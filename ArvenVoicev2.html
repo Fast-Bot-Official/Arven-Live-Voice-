@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020617">
+<title>Arven Voice V2</title>
+<style>
+:root{--bg:#020617;--panel:rgba(7,16,38,.78);--panel2:rgba(12,27,58,.88);--line:rgba(120,170,255,.18);--text:#f5f9ff;--muted:#91a4c5;--blue:#3b82f6;--cyan:#22d3ee;--danger:#fb7185;--good:#34d399}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#020617;color:var(--text);overflow:hidden}
+body{background:radial-gradient(circle at 50% 42%,#061b4d 0%,#030b20 34%,#01040d 72%);position:relative}
+body:before{content:"";position:absolute;inset:-20%;background:radial-gradient(circle at 50% 50%,rgba(37,99,235,.13),transparent 35%);filter:blur(30px);pointer-events:none}
+button,input{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+/* Auth */
+#auth{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:22px;z-index:20}
+.auth-card{width:min(430px,100%);padding:30px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,rgba(8,19,45,.92),rgba(3,9,25,.94));box-shadow:0 30px 100px rgba(0,0,0,.55),0 0 70px rgba(37,99,235,.12);backdrop-filter:blur(24px)}
+.brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:24px}
+.brand-dot{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#2dd4ff,#2563eb);box-shadow:0 0 30px rgba(34,211,238,.45);font-weight:900}
+.brand h1{margin:0;font-size:26px;letter-spacing:-.7px}
+.brand small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.auth-title{font-size:21px;font-weight:750;margin:0 0 7px}
+.auth-sub{font-size:13px;color:var(--muted);margin-bottom:18px}
+.tabs{display:flex;background:rgba(255,255,255,.045);border-radius:12px;padding:4px;margin-bottom:16px}
+.tabs button{flex:1;border:0;background:transparent;color:var(--muted);padding:10px;border-radius:9px}
+.tabs button.active{background:rgba(59,130,246,.17);color:white}
+.field{position:relative;margin:11px 0}
+.field input{width:100%;height:48px;border-radius:13px;border:1px solid var(--line);outline:none;background:rgba(255,255,255,.045);color:white;padding:0 14px}
+.field input:focus{border-color:rgba(59,130,246,.7);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.primary,.google,.danger,.ghost{width:100%;height:47px;border-radius:13px;border:1px solid var(--line);color:white;font-weight:700}
+.primary{background:linear-gradient(135deg,#2563eb,#0891b2);box-shadow:0 10px 28px rgba(37,99,235,.22)}
+.google{background:rgba(255,255,255,.055);margin-top:10px}
+.link{border:0;background:transparent;color:#7dd3fc;font-size:13px;margin:11px auto;display:block}
+.divider{display:flex;align-items:center;gap:10px;color:#64748b;font-size:12px;margin:17px 0}
+.divider:before,.divider:after{content:"";height:1px;background:var(--line);flex:1}
+.auth-note{text-align:center;color:#60708c;font-size:11px;line-height:1.5;margin-top:17px}
+
+/* Voice app */
+#app{position:absolute;inset:0;display:flex;flex-direction:column;z-index:2}
+.topbar{height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid rgba(120,170,255,.11);background:rgba(1,6,18,.42);backdrop-filter:blur(16px)}
+.top-left{display:flex;align-items:center;gap:11px}.mini-orb{width:36px;height:36px;border-radius:50%;object-fit:cover;box-shadow:0 0 20px rgba(37,99,235,.45)}
+.top-title{font-weight:750}.status{font-size:11px;color:var(--good);margin-top:2px}
+.top-actions{display:flex;gap:8px}
+.icon-btn{border:1px solid var(--line);background:rgba(255,255,255,.045);color:white;border-radius:10px;padding:9px 11px;font-size:12px}
+.main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 18px 25px;position:relative}
+.live-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(52,211,153,.2);background:rgba(52,211,153,.07);color:#8af0c9;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:700;letter-spacing:.2px}
+.live-dot{width:7px;height:7px;background:#34d399;border-radius:50%;box-shadow:0 0 12px #34d399}
+.orb-wrap{position:relative;width:min(54vw,360px);height:min(54vw,360px);max-width:360px;max-height:360px;margin:20px 0 14px;display:grid;place-items:center}
+.orb-glow{position:absolute;width:75%;height:75%;border-radius:50%;background:#1674ff;filter:blur(60px);opacity:.22;animation:glow 3.5s ease-in-out infinite}
+.spin-ring{position:absolute;width:101%;height:47%;top:30%;left:-.5%;border-radius:50%;border:2px solid transparent;border-top-color:#67e8f9;border-bottom-color:#22d3ee;filter:drop-shadow(0 0 8px #22d3ee);animation:spin 7s linear infinite;transform:rotate(-10deg)}
+.spin-ring:after{content:"";position:absolute;right:8%;top:7%;width:9px;height:9px;border-radius:50%;background:#b9f9ff;box-shadow:0 0 16px #22d3ee}
+.orb{position:relative;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 26px rgba(34,211,238,.25));animation:float 4s ease-in-out infinite}
+.subtitle{width:min(850px,94vw);min-height:58px;max-height:125px;overflow:auto;text-align:center;color:#dbeafe;font-size:15px;line-height:1.55;padding:7px 18px}
+.subtitle .who{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#6f86ab;margin-bottom:3px}
+.interim{color:#7f93b2;font-style:italic}
+.controls{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:18px}
+.control{height:52px;border-radius:999px;border:1px solid var(--line);padding:0 19px;color:white;background:rgba(255,255,255,.06);font-weight:750}
+.control.interrupt{background:rgba(251,113,133,.1);border-color:rgba(251,113,133,.24)}
+.control.end{background:linear-gradient(135deg,#2563eb,#0f766e);border:0;padding:0 24px}
+.mic{width:58px;height:58px;border-radius:50%;border:1px solid rgba(103,232,249,.35);background:rgba(8,36,67,.85);color:#a5f3fc;font-size:20px;box-shadow:0 0 25px rgba(34,211,238,.15)}
+.mic-icon{display:inline-block;width:12px;height:20px;border:2px solid currentColor;border-radius:8px;position:relative}.mic-icon:before{content:"";position:absolute;left:50%;bottom:-8px;width:18px;height:10px;border:2px solid currentColor;border-top:0;border-radius:0 0 10px 10px;transform:translateX(-50%)}.mic-icon:after{content:"";position:absolute;left:50%;bottom:-12px;width:2px;height:4px;background:currentColor;transform:translateX(-50%)}
+.mic.active{box-shadow:0 0 0 7px rgba(34,211,238,.07),0 0 35px rgba(34,211,238,.35);animation:pulse 1.4s ease-in-out infinite}
+.hint{font-size:11px;color:#60708c;margin-top:11px;text-align:center}
+.quota{position:absolute;bottom:9px;right:13px;color:#4f6385;font-size:10px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;background:#07142c;border:1px solid var(--line);box-shadow:0 14px 50px rgba(0,0,0,.45);border-radius:13px;padding:12px 16px;font-size:13px;max-width:min(92vw,480px);text-align:center}
+.modal{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.62);backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-card{width:min(400px,100%);background:#06122a;border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 30px 100px rgba(0,0,0,.7)}
+.modal-card h3{margin:0 0 8px}.modal-card p{color:var(--muted);font-size:13px;line-height:1.5}.modal-actions{display:flex;gap:9px;margin-top:18px}.modal-actions button{flex:1}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.012)}}@keyframes glow{0%,100%{transform:scale(.92);opacity:.17}50%{transform:scale(1.08);opacity:.3}}@keyframes pulse{50%{transform:scale(1.06)}}
+@media(max-width:600px){.auth-card{padding:24px}.orb-wrap{width:70vw;height:70vw}.controls{gap:7px}.control{padding:0 13px;font-size:12px}.control.end{padding:0 17px}.topbar{padding:0 12px}.icon-btn{padding:8px}}
+
+/* V2 coded Arven Orb — no bitmap/image is used. */
+.mini-orb-code{position:relative;overflow:visible;background:transparent;display:block;flex:none;box-shadow:none}
+.mini-orb-code .mini-face{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 45%,#07143a 0 43%,#06102a 57%,transparent 58%);z-index:3}
+.mini-orb-code .mini-face i{position:absolute;width:8px;height:5px;border:2px solid #7df4ff;border-top:0;border-radius:0 0 12px 12px;top:13px;filter:drop-shadow(0 0 4px #22d3ee)}
+.mini-orb-code .mini-face i:first-child{left:8px;transform:rotate(180deg)}.mini-orb-code .mini-face i:last-child{right:8px;transform:rotate(180deg)}
+.mini-orb-code .mini-ring{position:absolute;inset:1px;border:3px solid #37d9ff;border-radius:50%;transform:rotate(-17deg) scaleY(.38);box-shadow:0 0 9px #22d3ee;z-index:4}
+.mini-orb-code b{position:absolute;z-index:5;bottom:2px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:900;color:#c7fbff;text-shadow:0 0 7px #22d3ee}
+.orb-code{position:relative;width:100%;height:100%;display:block;filter:drop-shadow(0 0 26px rgba(34,211,238,.25));animation:float 4s ease-in-out infinite}
+.orb-sphere{position:absolute;inset:8%;border-radius:50%;background:
+ radial-gradient(ellipse at 31% 21%,rgba(255,255,255,.88) 0 5%,rgba(255,255,255,.25) 10%,transparent 18%),
+ radial-gradient(circle at 34% 28%,#20cfff 0%,#168df4 23%,#253ee7 52%,#101a82 76%,#060c36 100%);
+ box-shadow:inset -22px -28px 45px rgba(0,0,80,.5),inset 18px 12px 35px rgba(77,237,255,.5),0 0 30px rgba(27,137,255,.65),0 0 80px rgba(25,104,255,.28);z-index:1}
+.orb-sphere:after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 52% 42%,transparent 0 45%,rgba(45,225,255,.12) 65%,rgba(0,20,120,.5) 100%)}
+.orb-shine{position:absolute;z-index:6;left:19%;top:15%;width:25%;height:11%;border-radius:50%;background:rgba(239,255,255,.78);filter:blur(2px);transform:rotate(-28deg);opacity:.9}
+.orb-face{position:absolute;z-index:5;left:18%;right:18%;top:28%;height:40%;border-radius:50%;background:radial-gradient(ellipse at 50% 42%,rgba(3,10,35,.98),rgba(1,6,25,.98) 70%,rgba(1,4,18,.78));box-shadow:inset 0 0 22px rgba(0,0,0,.8),0 0 18px rgba(0,0,30,.35)}
+.orb-face i{position:absolute;top:43%;width:25%;height:20%;border-radius:50%;border-top:0;background:#72f3ff;box-shadow:0 0 8px #67e8f9,0 0 20px rgba(34,211,238,.7);transform:rotate(180deg);clip-path:path("M 0 70 Q 50 0 100 70 Q 96 95 82 78 Q 50 42 18 78 Q 4 95 0 70 Z")}
+.orb-face i:first-child{left:20%}.orb-face i:last-child{right:20%}
+.orb-logo{position:absolute;z-index:7;left:50%;bottom:13%;transform:translateX(-50%) rotate(-4deg);font-weight:950;font-size:68px;line-height:1;color:#c8fbff;text-shadow:0 0 8px #67e8f9,0 0 18px rgba(34,211,238,.8);font-family:Arial,sans-serif;letter-spacing:-8px}
+.orb-ring-back,.orb-ring-front{position:absolute;z-index:4;left:-3%;right:-3%;top:36%;height:25%;border:6px solid #67e8f9;border-radius:50%;transform:rotate(-10deg);box-shadow:0 0 8px #22d3ee,0 0 20px rgba(34,211,238,.7);pointer-events:none}
+.orb-ring-back{z-index:2;opacity:.85;clip-path:inset(0 0 52% 0)}
+.orb-ring-front{clip-path:inset(47% 0 0 0);background:transparent}
+.orb-code.active .orb-sphere{animation:orbBreath 1.8s ease-in-out infinite}.orb-code.active .orb-ring-front,.orb-code.active .orb-ring-back{animation:orbRingPulse 1.8s ease-in-out infinite}
+@keyframes orbBreath{50%{transform:scale(1.018);filter:saturate(1.16) brightness(1.08)}}
+@keyframes orbRingPulse{50%{filter:drop-shadow(0 0 14px #22d3ee);opacity:1}}
+</style>
+</head>
+<body>
+<section id="auth">
+  <div class="auth-card">
+    <div class="brand">
+      <div class="mini-orb mini-orb-code" aria-hidden="true"><span class="mini-face"><i></i><i></i></span><span class="mini-ring"></span><b>A</b></div>
+      <div><h1>Arven</h1><small>Voice</small></div>
+    </div>
+    <h2 class="auth-title" id="authHeading">Sign in to Arven Voice</h2>
+    <div class="auth-sub">Your voice session starts immediately after authentication.</div>
+    <div class="tabs">
+      <button id="tabSignIn" class="active" type="button">Sign In</button>
+      <button id="tabSignUp" type="button">Create Account</button>
+    </div>
+    <form id="authForm">
+      <div class="field"><input id="email" type="email" autocomplete="email" placeholder="Email address" required></div>
+      <div class="field"><input id="password" type="password" autocomplete="current-password" minlength="6" placeholder="Password" required></div>
+      <button class="primary" id="authSubmit" type="submit">Sign In</button>
+      <button class="link" id="forgot" type="button">Forgot password?</button>
+    </form>
+    <div class="divider">or</div>
+    <button class="google" id="google" type="button">Continue with Google</button>
+    <div class="auth-note">Firebase Authentication is used for identity. Your Firebase ID token is sent to the Arven backend for protected requests.</div>
+  </div>
+</section>
+
+<section id="app" class="hidden">
+  <header class="topbar">
+    <div class="top-left">
+      <div class="mini-orb mini-orb-code" aria-hidden="true"><span class="mini-face"><i></i><i></i></span><span class="mini-ring"></span><b>A</b></div>
+      <div><div class="top-title">Arven Voice</div><div class="status" id="status">Connecting…</div></div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="subToggle">Subtitles: On</button>
+      <button class="icon-btn" id="logout">Log out</button>
+    </div>
+  </header>
+  <main class="main">
+    <div class="live-pill"><span class="live-dot"></span><span id="liveLabel">LIVE VOICE</span></div>
+    <div class="orb-wrap">
+      <div class="orb-glow"></div>
+      <div class="spin-ring"></div>
+      <div class="orb orb-code" aria-label="Animated Arven Orb" role="img">
+        <span class="orb-sphere"></span>
+        <span class="orb-shine"></span>
+        <span class="orb-face"><i></i><i></i></span>
+        <span class="orb-logo">A</span>
+        <span class="orb-ring-back"></span>
+        <span class="orb-ring-front"></span>
+      </div>
+    </div>
+    <div class="subtitle" id="subtitle">
+      <div class="who">Arven</div>
+      <div id="subtitleText">Listening…</div>
+    </div>
+    <div class="controls">
+      <button class="control interrupt" id="interrupt">Interrupt</button>
+      <button class="mic" id="mic" aria-label="Microphone"><span class="mic-icon" aria-hidden="true"></span></button>
+      <button class="control end" id="end">End Voice Chat</button>
+    </div>
+    <div class="hint" id="hint">Speak naturally. You can interrupt Arven at any time.</div>
+    <div class="quota" id="quota"></div>
+  </main>
+</section>
+
+<div id="toast" class="toast hidden"></div>
+<div id="limitModal" class="modal hidden">
+  <div class="modal-card">
+    <h3>Daily limit reached</h3>
+    <p>Arven has rejected this request because your daily request limit has been reached. The server resets the quota at <b>12:35 PM IST</b>.</p>
+    <div class="modal-actions"><button class="primary" id="closeLimit">OK</button></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script>
+(() => {
+'use strict';
+
+const BACKEND = 'https://arven-backend-m6ft.onrender.com';
+const CLIENT_VERSION = '17.1';
+const LIVE_MODEL = 'gemini-3.1-flash-live-preview';
+/*
+ * IMPORTANT:
+ * The current Arven backend exposes /generate, but its saved server.js does not
+ * expose Gemini Live API/WebSocket sessions. This client therefore uses the
+ * existing authenticated /generate contract as a compatibility voice loop.
+ * If the backend later exposes /live, the Live API adapter can be switched on
+ * without changing authentication/UI.
+ */
+const VOICE_FALLBACK_MODEL = 'gemini-3.5-flash';
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyAqzMX2aMJC9vPTKkGZhL5i3Bjemd0aa9E',
+  authDomain: 'arvenai.firebaseapp.com',
+  projectId: 'arvenai',
+  storageBucket: 'arvenai.firebasestorage.app',
+  messagingSenderId: '839108518515',
+  appId: '1:839108518515:web:1f7f061959569cbed94006'
+};
+
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+
+let mode = 'signin';
+let subtitles = true;
+let recognition = null;
+let listening = false;
+let speaking = false;
+let sessionActive = false;
+let requestBusy = false;
+let interruptRequested = false;
+let history = [];
+let quota = null;
+
+const $ = id => document.getElementById(id);
+const show = el => el.classList.remove('hidden');
+const hide = el => el.classList.add('hidden');
+
+function toast(message){
+  const el=$('toast'); el.textContent=message; show(el);
+  clearTimeout(toast.timer); toast.timer=setTimeout(()=>hide(el),4200);
+}
+
+function showLimit(){
+  window.speechSynthesis?.cancel();
+  $('limitModal').classList.remove('hidden');
+  $('status').textContent='Daily limit reached';
+}
+
+function friendlyAuthError(e){
+  const m={
+    'auth/invalid-email':'Please enter a valid email address.',
+    'auth/user-not-found':'No account was found for that email.',
+    'auth/wrong-password':'Incorrect email or password.',
+    'auth/invalid-credential':'The email or password is incorrect.',
+    'auth/email-already-in-use':'An account already exists with that email.',
+    'auth/weak-password':'Use a stronger password.',
+    'auth/popup-closed-by-user':'Google sign-in was cancelled.',
+    'auth/popup-blocked':'Your browser blocked the Google sign-in popup.',
+    'auth/network-request-failed':'Network error. Please try again.'
+  };
+  return m[e?.code] || e?.message || 'Authentication failed. Please try again.';
+}
+
+function setMode(next){
+  mode=next;
+  $('tabSignIn').classList.toggle('active',mode==='signin');
+  $('tabSignUp').classList.toggle('active',mode==='signup');
+  $('authSubmit').textContent=mode==='signin'?'Sign In':'Create Account';
+  $('forgot').classList.toggle('hidden',mode!=='signin');
+  $('password').autocomplete=mode==='signin'?'current-password':'new-password';
+  $('authHeading').textContent=mode==='signin'?'Sign in to Arven Voice':'Create your Arven account';
+}
+
+$('tabSignIn').onclick=()=>setMode('signin');
+$('tabSignUp').onclick=()=>setMode('signup');
+
+$('forgot').onclick=async()=>{
+  const email=$('email').value.trim();
+  if(!email)return toast('Enter your email address first.');
+  try{await auth.sendPasswordResetEmail(email);toast('Password reset email sent.');}
+  catch(e){toast(friendlyAuthError(e));}
+};
+
+$('authForm').onsubmit=async e=>{
+  e.preventDefault();
+  const email=$('email').value.trim(), password=$('password').value;
+  if(!email||!password)return;
+  $('authSubmit').disabled=true;
+  try{
+    if(mode==='signin') await auth.signInWithEmailAndPassword(email,password);
+    else await auth.createUserWithEmailAndPassword(email,password);
+  }catch(e){toast(friendlyAuthError(e));}
+  finally{$('authSubmit').disabled=false;}
+};
+
+$('google').onclick=async()=>{
+  const provider=new firebase.auth.GoogleAuthProvider();
+  try{await auth.signInWithPopup(provider);}
+  catch(e){toast(friendlyAuthError(e));}
+};
+
+async function getToken(force=false){
+  const u=auth.currentUser;
+  if(!u||u.isAnonymous) throw new Error('AUTH_REQUIRED');
+  return await u.getIdToken(force);
+}
+
+async function authFetch(path, options={}, retried=false){
+  const token=await getToken(false);
+  const headers=new Headers(options.headers||{});
+  headers.set('Authorization','Bearer '+token);
+  headers.set('X-Arven-Client-Version',CLIENT_VERSION);
+  if(options.body!==undefined)headers.set('Content-Type','application/json');
+
+  const res=await fetch(BACKEND+path,{...options,headers});
+  let data={}; try{data=await res.json();}catch(_){}
+  if(res.status===401 && !retried){
+    await getToken(true);
+    return authFetch(path,options,true);
+  }
+  if(!res.ok){
+    const err=new Error(data?.message||data?.error||`Backend request failed (HTTP ${res.status}).`);
+    err.status=res.status; err.data=data;
+    throw err;
+  }
+  return data;
+}
+
+function updateQuota(q){
+  quota=q||null;
+  if(!q){$('quota').textContent='';return;}
+  $('quota').textContent=`Today: ${q.daily ?? 0}/${q.dailyLimit ?? '—'} requests · reset ${q.resetAt||'12:35 PM IST'}`;
+}
+
+async function loadUsage(){
+  try{const d=await authFetch('/usage'); updateQuota(d?.usage||d);}
+  catch(e){console.warn('Usage unavailable',e);}
+}
+
+function stopRecognition(){
+  if(recognition){
+    try{ recognition.onend=null; recognition.stop(); }catch(_){}
+  }
+  listening=false;
+  $('mic').classList.remove('active');
+  updateOrbState();
+}
+
+function interrupt(){
+  interruptRequested=true;
+  window.speechSynthesis?.cancel();
+  speaking=false;
+  updateOrbState();
+  $('status').textContent='Listening…';
+  if(sessionActive) startListening();
+}
+
+function setupRecognition(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){
+    $('status').textContent='Microphone API unavailable';
+    $('hint').textContent='This browser does not expose Speech Recognition. Use a browser with speech recognition enabled.';
+    return false;
+  }
+  recognition=new SR();
+  recognition.lang='en-IN';
+  // Keep one recognition session alive instead of repeatedly starting/stopping it.
+  // The page creates no microphone/UI audio. Browser-level speech-recognition earcons are not page audio;
+  // keeping the recognition session continuous prevents the repeated Google-style start/stop sounds.
+  // This prevents the browser's start/stop microphone earcon from playing after every turn.
+  recognition.continuous=true;
+  recognition.interimResults=true;
+  recognition.maxAlternatives=1;
+  if('processLocally' in recognition){
+    try{ recognition.processLocally=true; }catch(_){}
+  }
+
+  recognition.onstart=()=>{
+    listening=true;
+    $('mic').classList.add('active');
+    updateOrbState();
+    if(!speaking && !requestBusy) $('status').textContent='Listening…';
+  };
+  recognition.onresult=e=>{
+    let finalText='', interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const text=e.results[i][0].transcript;
+      if(e.results[i].isFinal) finalText+=text;
+      else interim+=text;
+    }
+    // Recognition remains active while Arven speaks so there is no stop/start earcon.
+    // Ignore anything the speech synthesizer may have caused while Arven is talking.
+    if(speaking || requestBusy) return;
+    if(subtitles){
+      $('subtitle').innerHTML='<div class="who">You</div><div class="interim">'+escapeHtml(finalText||interim||'Listening…')+'</div>';
+    }
+    if(finalText.trim()) handleUserTurn(finalText.trim());
+  };
+  recognition.onerror=e=>{
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+      listening=false;$('mic').classList.remove('active');
+    updateOrbState();
+      $('status').textContent='Microphone permission needed';
+      toast('Microphone permission is required for voice chat.');
+      return;
+    }
+    // Some browsers terminate continuous recognition after network/service interruptions.
+    // Restart only when the browser has actually ended the session; this is not a normal turn cycle.
+    if(e.error!=='aborted') console.warn('Speech recognition:',e.error);
+  };
+  recognition.onend=()=>{
+    listening=false;
+    $('mic').classList.remove('active');
+    if(sessionActive){
+      // Browser may end continuous recognition on its own. Re-open it silently where possible.
+      setTimeout(()=>startListening(),300);
+    }
+  };
+  return true;
+}
+
+function updateOrbState(){
+  const orb=document.querySelector('.orb-code');
+  if(!orb)return;
+  orb.classList.toggle('active',!!(listening||speaking||requestBusy));
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+function renderSubtitle(who,text,interim=false){
+  if(!subtitles)return;
+  $('subtitle').innerHTML=`<div class="who">${escapeHtml(who)}</div><div class="${interim?'interim':''}">${escapeHtml(text)}</div>`;
+}
+
+async function handleUserTurn(text){
+  if(!sessionActive || requestBusy)return;
+  interruptRequested=false;
+  window.speechSynthesis?.cancel();
+  requestBusy=true;
+  speaking=false;
+  updateOrbState();
+  $('status').textContent='Arven is thinking…';
+  renderSubtitle('You',text);
+
+  history.push({role:'user',parts:[{text}]});
+  if(history.length>20)history=history.slice(-20);
+
+  try{
+    const system = `You are Arven, a friendly real-time voice assistant. Reply naturally for spoken conversation. Keep responses concise unless the user asks for detail. Do not use markdown, tables, or long formatting. The user can interrupt you at any time.`;
+    const d=await authFetch('/generate',{
+      method:'POST',
+      body:JSON.stringify({
+        model:VOICE_FALLBACK_MODEL,
+        systemInstruction:{parts:[{text:system}]},
+        contents:history
+      })
+    });
+    updateQuota(d?.usage);
+    const answer=String(d?.text||'').trim();
+    if(!answer)throw new Error('Arven returned an empty response.');
+    history.push({role:'model',parts:[{text:answer}]});
+    if(history.length>20)history=history.slice(-20);
+    renderSubtitle('Arven',answer);
+    await speak(answer);
+  }catch(e){
+    if(e?.data?.code==='DAILY_LIMIT'||e?.status===429&&String(e?.data?.code||'').includes('DAILY')){
+      showLimit(); sessionActive=false; stopRecognition(); return;
+    }
+    if(e?.status===429 && /daily limit/i.test(String(e?.data?.message||e.message||''))){
+      showLimit(); sessionActive=false; stopRecognition(); return;
+    }
+    if(e?.status===401){
+      toast('Your Arven session expired. Please sign in again.');
+      await auth.signOut(); return;
+    }
+    console.error(e);
+    renderSubtitle('Arven',e?.message||'I could not reach Arven right now.');
+    $('status').textContent='Connection error';
+  }finally{
+    requestBusy=false;
+    updateOrbState();
+    if(sessionActive && !speaking && !interruptRequested)setTimeout(()=>startListening(),250);
+  }
+}
+
+function speak(text){
+  return new Promise(resolve=>{
+    if(!('speechSynthesis' in window)){resolve();return;}
+    window.speechSynthesis.cancel();
+    const utter=new SpeechSynthesisUtterance(text);
+    utter.lang='en-IN';
+    utter.rate=.98; utter.pitch=1.02;
+    speaking=true; updateOrbState(); $('status').textContent='Arven is speaking…';
+    utter.onend=()=>{speaking=false;updateOrbState();$('status').textContent='Listening…';resolve();};
+    utter.onerror=()=>{speaking=false;updateOrbState();resolve();};
+    window.speechSynthesis.speak(utter);
+  });
+}
+
+function startListening(){
+  if(!sessionActive||listening)return;
+  if(!recognition && !setupRecognition())return;
+  try{recognition.start();}catch(_){}
+}
+
+async function beginVoiceSession(){
+  sessionActive=true;
+  $('status').textContent='Starting voice chat…';
+  await loadUsage();
+  renderSubtitle('Arven','Hi — I’m Arven. I’m listening.');
+  if(!setupRecognition()){
+    // Keep the UI usable even where SpeechRecognition is not supported.
+    $('hint').textContent='Voice recognition is unavailable in this browser. The rest of the authenticated Arven Voice UI is ready.';
+    return;
+  }
+  $('hint').textContent='Speak naturally. You can interrupt Arven at any time.';
+  startListening();
+}
+
+$('mic').onclick=()=>{
+  if(listening)stopRecognition();
+  else if(speaking)interrupt();
+  else startListening();
+};
+
+$('interrupt').onclick=interrupt;
+
+$('subToggle').onclick=()=>{
+  subtitles=!subtitles;
+  $('subToggle').textContent='Subtitles: '+(subtitles?'On':'Off');
+  if(!subtitles)$('subtitle').textContent='';
+  else renderSubtitle('Arven','Subtitles enabled.');
+};
+
+$('end').onclick=()=>{
+  sessionActive=false;
+  stopRecognition();
+  window.speechSynthesis?.cancel();
+  location.href='https://fast-bot-official.github.io/ArvenAI/';
+};
+
+$('logout').onclick=async()=>{
+  sessionActive=false; stopRecognition(); window.speechSynthesis?.cancel();
+  await auth.signOut();
+};
+
+$('closeLimit').onclick=()=>hide($('limitModal'));
+
+auth.onAuthStateChanged(async user=>{
+  window.arvenAuth={user:user||null,ready:true};
+  if(user && !user.isAnonymous){
+    hide($('auth')); show($('app'));
+    await beginVoiceSession();
+  }else{
+    sessionActive=false;stopRecognition();window.speechSynthesis?.cancel();
+    hide($('app'));show($('auth'));
+  }
+});
+
+})();
+</script>
+</body>
+</html>
